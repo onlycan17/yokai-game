@@ -2,7 +2,7 @@
 
 class AnimationOptimizer {
     constructor() {
-        this.isPerformanceMode = false;
+        this.isPerformanceMode = true; // 기본적으로 성능 모드 활성화
         this.animationQueue = [];
         this.rafId = null;
         this.frameTime = 16.67; // 60fps 기준
@@ -19,8 +19,8 @@ class AnimationOptimizer {
     }
     
     init() {
-        // 성능 모드 감지
-        this.detectPerformanceNeed();
+        // 성능 모드 기본 활성화
+        this.enablePerformanceMode();
         
         // 애니메이션 루프 시작
         this.startAnimationLoop();
@@ -28,7 +28,7 @@ class AnimationOptimizer {
         // 성능 모니터링 시작
         this.startPerformanceMonitoring();
         
-        console.log('🚀 AnimationOptimizer 초기화 완료');
+        console.log('🚀 AnimationOptimizer 초기화 완료 (성능 모드 활성화)');
     }
     
     // 성능 필요성 감지
@@ -69,14 +69,21 @@ class AnimationOptimizer {
         console.log('🎨 일반 모드로 전환됨');
     }
     
-    // 애니메이션 축소
+    // 애니메이션 축소 - 모든 애니메이션 제거, 말 움직임만 유지
     reduceAnimations() {
         const style = document.createElement('style');
         style.id = 'performance-reduction';
         style.textContent = `
             .performance-mode * {
-                animation-duration: 0.5s !important;
-                transition-duration: 0.2s !important;
+                animation: none !important;
+                transition: none !important;
+            }
+            /* 말 움직임 애니메이션만 유지 */
+            .performance-mode .player-piece {
+                transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+            }
+            .performance-mode .player-piece.focused {
+                animation: playerFocusPulse 0.5s ease-in-out 1 !important;
             }
             .performance-mode .board-room {
                 animation: none !important;
@@ -185,41 +192,41 @@ class AnimationOptimizer {
         });
     }
     
-    // 플레이어 이동 애니메이션 최적화
+    // 플레이어 이동 애니메이션 최적화 - 핵심 기능만 유지
     animatePlayerMove(playerElement, targetPosition, callback) {
         if (!playerElement) return;
         
-        const startPos = playerElement.getBoundingClientRect();
         const targetElement = document.getElementById(`room-${targetPosition}`);
-        
         if (!targetElement) return;
         
-        const targetPos = targetElement.getBoundingClientRect();
-        const deltaX = targetPos.left - startPos.left;
-        const deltaY = targetPos.top - startPos.top;
-        
-        // GPU 가속 활용한 부드러운 이동
-        playerElement.style.willChange = 'transform';
-        playerElement.style.transition = this.isPerformanceMode ? 
-            'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)' :
-            'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        
-        // Transform을 사용한 이동 (성능 최적화)
-        requestAnimationFrame(() => {
-            playerElement.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
+        // 성능 모드에서는 즉시 이동, 일반 모드에서는 짧은 애니메이션
+        if (this.isPerformanceMode) {
+            // 즉시 이동
+            targetElement.appendChild(playerElement);
+            if (callback) callback();
+        } else {
+            // 부드러운 이동 (성능 최적화된 짧은 애니메이션)
+            const startPos = playerElement.getBoundingClientRect();
+            const targetPos = targetElement.getBoundingClientRect();
+            const deltaX = targetPos.left - startPos.left;
+            const deltaY = targetPos.top - startPos.top;
             
-            // 애니메이션 완료 후 정리
-            setTimeout(() => {
-                playerElement.style.willChange = 'auto';
-                playerElement.style.transition = '';
-                playerElement.style.transform = '';
+            playerElement.style.willChange = 'transform';
+            playerElement.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            
+            requestAnimationFrame(() => {
+                playerElement.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0)`;
                 
-                // 실제 위치로 이동
-                targetElement.appendChild(playerElement);
-                
-                if (callback) callback();
-            }, this.isPerformanceMode ? 300 : 600);
-        });
+                setTimeout(() => {
+                    playerElement.style.willChange = 'auto';
+                    playerElement.style.transition = '';
+                    playerElement.style.transform = '';
+                    targetElement.appendChild(playerElement);
+                    
+                    if (callback) callback();
+                }, 400);
+            });
+        }
     }
     
     // 카메라 포커스 최적화
