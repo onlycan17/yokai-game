@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기본 게임 테스트</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/board-original.css">
+    <link rel="stylesheet" href="src/styles/cards-new.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-board" class="game-board">
+            <!-- 게임 보드 컨텐츠 -->
+        </div>
+        <div id="card-deck" class="card-deck">
+            <!-- 카드 덱 영역 -->
+        </div>
+        <div id="player-area" class="player-area">
+            <!-- 플레이어 정보 영역 -->
+        </div>
+    </div>
+
+    <script type="module">
+        import OriginalYokaiBoard from './src/js/board-original.js';
+        
+        // 기본 게임 보드만 직접 실행
+        const board = new OriginalYokaiBoard();
+        board.init();
+        
+        console.log('기본 보드 테스트 실행됨');
+    </script>
+</body>
+</html>

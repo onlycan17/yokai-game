@@ -1,0 +1,21 @@
+{
+  "name": "yokai-castle-escape",
+  "version": "1.0.0",
+  "description": "요괴의 성 탈출 디지털 보드게임",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000",
+    "dev": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "board game",
+    "yokai",
+    "escape",
+    "digital"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.54.1"
+  }
+}

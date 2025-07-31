@@ -1,0 +1,365 @@
+/* UI 장식 및 향상 요소 */
+
+/* 전체 컨테이너 향상 */
+#game-container {
+    background: 
+        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><pattern id="stars" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.5" fill="rgba(255,255,255,0.3)"/></pattern></defs><rect width="100" height="100" fill="url(%23stars)"/></svg>'),
+        radial-gradient(ellipse at center, #2a1f3f 0%, #0a0515 100%);
+    background-size: 100px 100px, cover;
+    animation: starTwinkle 20s ease-in-out infinite;
+}
+
+@keyframes starTwinkle {
+    0%, 100% { background-position: 0 0, center; }
+    50% { background-position: 50px 50px, center; }
+}
+
+/* 제목 장식 */
+.game-info h2 {
+    position: relative;
+    background: linear-gradient(45deg, #da70d6, #8a2b9f, #da70d6);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGlow 3s ease-in-out infinite;
+}
+
+.game-info h2::before {
+    content: '👹';
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    animation: iconFloat 2s ease-in-out infinite;
+}
+
+.game-info h2::after {
+    content: '🏰';
+    position: absolute;
+    right: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 24px;
+    animation: iconFloat 2s ease-in-out infinite reverse;
+}
+
+@keyframes titleGlow {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(-50%) scale(1); }
+    50% { transform: translateY(-60%) scale(1.1); }
+}
+
+/* 상태 표시 향상 */
+.status-item {
+    position: relative;
+    padding: 8px 12px;
+    background: rgba(74, 31, 95, 0.2);
+    border-radius: 8px;
+    margin: 5px 0;
+    border-left: 3px solid #da70d6;
+    transition: all 0.3s ease;
+}
+
+.status-item:hover {
+    background: rgba(74, 31, 95, 0.4);
+    transform: translateX(5px);
+}
+
+/* 게임 버튼 향상 */
+.game-button {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #4a1f5f 0%, #2a0f3f 100%);
+    border: 2px solid #6a2f8f;
+    color: #e0e0e0;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.game-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.game-button:hover::before {
+    left: 100%;
+}
+
+.game-button:hover {
+    background: linear-gradient(135deg, #5a2f6f 0%, #3a1f4f 100%);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+    transform: translateY(-2px);
+}
+
+.game-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* 카드 덱 영역 향상 */
+#movement-card-area {
+    position: relative;
+    min-height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(26, 15, 42, 0.3);
+    border: 2px dashed rgba(138, 43, 226, 0.5);
+    border-radius: 10px;
+    margin: 15px 0;
+    transition: all 0.3s ease;
+}
+
+#movement-card-area:empty::before {
+    content: '이동 카드를 뽑으세요';
+    color: rgba(224, 224, 224, 0.5);
+    font-style: italic;
+}
+
+#movement-card-area .card {
+    animation: cardDraw 0.5s ease-out;
+}
+
+@keyframes cardDraw {
+    0% {
+        opacity: 0;
+        transform: translateY(50px) scale(0.8) rotateY(180deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotateY(0deg);
+    }
+}
+
+/* 수호신 카드 영역 향상 */
+.guardian-hand {
+    position: relative;
+}
+
+.guardian-hand::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    background: linear-gradient(45deg, #4a1f5f, #6a3f8a, #4a1f5f);
+    border-radius: 15px;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+.guardian-hand h3 {
+    position: relative;
+    background: linear-gradient(45deg, #4ecdc4, #6fcfef);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.guardian-hand h3::before {
+    content: '🛡️';
+    margin-right: 8px;
+    -webkit-text-fill-color: initial;
+}
+
+/* 스크롤바 커스터마이징 */
+#guardian-cards::-webkit-scrollbar {
+    width: 8px;
+}
+
+#guardian-cards::-webkit-scrollbar-track {
+    background: rgba(26, 15, 42, 0.5);
+    border-radius: 4px;
+}
+
+#guardian-cards::-webkit-scrollbar-thumb {
+    background: linear-gradient(45deg, #4a1f5f, #6a3f8a);
+    border-radius: 4px;
+}
+
+#guardian-cards::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(45deg, #6a3f8a, #8a5faa);
+}
+
+/* 플레이어 말 향상 */
+.player-piece {
+    position: relative;
+    animation: playerPulse 2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.6));
+}
+
+@keyframes playerPulse {
+    0%, 100% { 
+        transform: scale(1);
+        filter: drop-shadow(0 0 8px rgba(255, 107, 107, 0.6));
+    }
+    50% { 
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 12px rgba(255, 107, 107, 0.8));
+    }
+}
+
+/* 방 호버 효과 향상 */
+.board-cell:hover {
+    animation: roomShimmer 0.5s ease-in-out;
+}
+
+@keyframes roomShimmer {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.3) saturate(1.2); }
+}
+
+/* 이동 가능한 방 표시 향상 */
+.board-cell.moveable {
+    animation: moveableGlow 1s ease-in-out infinite;
+    position: relative;
+}
+
+.board-cell.moveable::after {
+    content: '✨';
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    font-size: 16px;
+    animation: sparkle 1s ease-in-out infinite;
+}
+
+@keyframes moveableGlow {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+        border-color: rgba(0, 255, 0, 0.8);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(0, 255, 0, 1);
+        border-color: rgba(0, 255, 0, 1);
+    }
+}
+
+@keyframes sparkle {
+    0%, 100% { 
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.7;
+    }
+}
+
+/* 툴팁 시스템 */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+    z-index: 3000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    border: 1px solid rgba(138, 43, 226, 0.5);
+}
+
+.tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 로딩 스피너 */
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(138, 43, 226, 0.3);
+    border-radius: 50%;
+    border-top-color: #8a2b9f;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* 성공/실패 알림 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 4000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    border-left: 4px solid #2e7d32;
+}
+
+.notification.error {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    border-left: 4px solid #c62828;
+}
+
+.notification.info {
+    background: linear-gradient(135deg, #2196f3, #1976d2);
+    border-left: 4px solid #1565c0;
+}
+
+/* 미디어 쿼리 - 모바일 최적화 */
+@media (max-width: 768px) {
+    .game-info h2::before,
+    .game-info h2::after {
+        display: none;
+    }
+    
+    .status-item {
+        padding: 6px 8px;
+        font-size: 14px;
+    }
+    
+    .game-button {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .notification {
+        right: 10px;
+        left: 10px;
+        transform: translateY(-100%);
+    }
+    
+    .notification.show {
+        transform: translateY(0);
+    }
+}

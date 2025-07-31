@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:bbs.ruliweb.com)",
+      "Bash(mkdir:*)",
+      "Bash(python3:*)",
+      "WebFetch(domain:namu.wiki)",
+      "WebFetch(domain:m.blog.naver.com)",
+      "WebFetch(domain:www.inside-games.jp)",
+      "WebFetch(domain:gioco.sytes.net)",
+      "WebFetch(domain:www.pinterest.com)",
+      "mcp__playwright-mcp__new_page",
+      "Bash(ls:*)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx:*)",
+      "mcp__playwright-mcp__navigate",
+      "Bash(node:*)",
+      "Bash(curl:*)",
+      "Bash(grep:*)",
+      "mcp__playwright-mcp__get_pages",
+      "Bash(open test-performance.html)",
+      "Bash(open advanced-test.html)",
+      "Bash(open final-optimization-test.html)",
+      "Bash(rm:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(git add:*)"
+    ],
+    "deny": []
+  }
+}

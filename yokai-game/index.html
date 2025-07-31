@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요괴의 성 탈출</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/board-original.css">
+    <link rel="stylesheet" href="src/styles/cards-new.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-board" class="game-board">
+            <!-- 게임 보드 컨텐츠 -->
+        </div>
+        <div id="card-deck" class="card-deck">
+            <!-- 카드 덱 영역 -->
+        </div>
+        <div id="player-area" class="player-area">
+            <!-- 플레이어 정보 영역 -->
+        </div>
+    </div>
+    
+    <script type="module">
+        import OriginalYokaiCastleGame from './src/js/game-original.js';
+        
+        // 게임 인스턴스 생성 및 시작
+        window.game = new OriginalYokaiCastleGame();
+        window.game.init();
+    </script>
+</body>
+</html>

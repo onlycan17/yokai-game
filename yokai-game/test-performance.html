@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요괴의 성 탈출 - 성능 테스트</title>
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/board-original.css">
+    <link rel="stylesheet" href="src/styles/cards-new.css">
+    <link rel="stylesheet" href="src/styles/ui-enhancements.css">
+    <link rel="stylesheet" href="src/styles/performance-optimized.css">
+    <style>
+        #test-console {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            max-height: 300px;
+            background: rgba(0, 0, 0, 0.9);
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-y: auto;
+            z-index: 10000;
+            border: 2px solid #00ff00;
+        }
+        
+        #test-controls {
+            position: fixed;
+            bottom: 330px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 10000;
+        }
+        
+        button {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 2px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #45b7aa;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="game-board" class="game-board">
+            <!-- 게임 보드 컨텐츠 -->
+        </div>
+        <div id="card-deck" class="card-deck">
+            <!-- 카드 덱 영역 -->
+        </div>
+        <div id="player-area" class="player-area">
+            <!-- 플레이어 정보 영역 -->
+        </div>
+    </div>
+    
+    <!-- 테스트 컨트롤 -->
+    <div id="test-controls">
+        <button onclick="runPerformanceTest()">🚀 성능 테스트 실행</button>
+        <button onclick="clearConsole()">🗑️ 콘솔 클리어</button>
+        <button onclick="toggleOptimization()">⚡ 최적화 토글</button>
+    </div>
+    
+    <!-- 테스트 콘솔 -->
+    <div id="test-console">
+        <div id="console-content">🎮 요괴의 성 탈출 성능 테스트 준비 완료</div>
+    </div>
+    
+    <script>
+        // 콘솔 오버라이드
+        const originalConsoleLog = console.log;
+        const consoleContent = document.getElementById('console-content');
+        
+        console.log = function(...args) {
+            const message = args.join(' ');
+            const div = document.createElement('div');
+            div.textContent = new Date().toTimeString().substr(0,8) + ' - ' + message;
+            consoleContent.appendChild(div);
+            consoleContent.scrollTop = consoleContent.scrollHeight;
+            originalConsoleLog.apply(console, args);
+        };
+        
+        function clearConsole() {
+            consoleContent.innerHTML = '🎮 콘솔 클리어됨';
+        }
+        
+        function runPerformanceTest() {
+            if (window.performanceTest) {
+                window.performanceTest.runFullTest();
+            } else {
+                console.log('❌ 성능 테스트 모듈이 로드되지 않았습니다.');
+            }
+        }
+        
+        function toggleOptimization() {
+            if (window.animationOptimizer) {
+                if (window.animationOptimizer.isPerformanceMode) {
+                    window.animationOptimizer.disablePerformanceMode();
+                    console.log('⚡ 최적화 비활성화됨');
+                } else {
+                    window.animationOptimizer.enablePerformanceMode();
+                    console.log('🚀 최적화 활성화됨');
+                }
+            } else {
+                console.log('❌ 애니메이션 최적화 모듈이 없습니다.');
+            }
+        }
+    </script>
+    
+    <script type="module" src="src/js/game-original.js"></script>
+</body>
+</html>
