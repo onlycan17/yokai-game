@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>요괴의 성 탈출 - Web Workers 병렬 처리 데모</title>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            background: linear-gradient(135deg, #2c1810, #4a2c2a);
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff6b35;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .demo-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .demo-title {
+            color: #ff9d7d;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .control-panel {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ff6b35, #ff8c69);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #ff8c69, #ffab91);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-display {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 100px;
+            overflow-y: auto;
+            max-height: 300px;
+        }
+
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .metric-card {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid rgba(255, 107, 53, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b35;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .benchmark-progress {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #ff8c69);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-left: 3px solid #ff6b35;
+            background: rgba(255, 107, 53, 0.05);
+        }
+
+        .log-timestamp {
+            color: #999;
+            font-size: 0.8em;
+        }
+
+        .worker-status {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .worker-indicator {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .worker-ready {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+        }
+
+        .worker-busy {
+            background: rgba(255, 193, 7, 0.3);
+            color: #ffc107;
+        }
+
+        .worker-error {
+            background: rgba(244, 67, 54, 0.3);
+            color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏰 요괴의 성 탈출 - Web Workers 병렬 처리 데모</h1>
+
+        <!-- Worker 상태 섹션 -->
+        <div class="demo-section">
+            <div class="demo-title">🔧 Web Workers 상태</div>
+            <div class="control-panel">
+                <button class="btn" onclick="initializeWorkers()">Workers 초기화</button>
+                <button class="btn" onclick="checkWorkerStatus()">상태 확인</button>
+                <button class="btn" onclick="restartWorkers()">Workers 재시작</button>
+            </div>
+            <div class="worker-status" id="workerStatus">
+                <span class="worker-indicator worker-error">gameLogic: 대기중</span>
+                <span class="worker-indicator worker-error">animation: 대기중</span>
+                <span class="worker-indicator worker-error">dataProcessor: 대기중</span>
+            </div>
+            <div class="status-display" id="workerLog"></div>
+        </div>
+
+        <!-- 카드 처리 데모 섹션 -->
+        <div class="demo-section">
+            <div class="demo-title">🎴 카드 처리 병렬화 데모</div>
+            <div class="control-panel">
+                <button class="btn" onclick="shuffleCards()">덱 셔플</button>
+                <button class="btn" onclick="drawCards()">카드 뽑기</button>
+                <button class="btn" onclick="calculateEffectiveness()">효과 계산</button>
+                <button class="btn" onclick="batchCardOperations()">배치 처리</button>
+            </div>
+            <div id="cardProgress" class="benchmark-progress">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="status-display" id="cardLog"></div>
+        </div>
+
+        <!-- 보드 분석 데모 섹션 -->
+        <div class="demo-section">
+            <div class="demo-title">🗺️ 보드 분석 병렬화 데모</div>
+            <div class="control-panel">
+                <button class="btn" onclick="calculatePaths()">경로 계산</button>
+                <button class="btn" onclick="analyzeSafety()">안전도 분석</button>
+                <button class="btn" onclick="findStrategicPositions()">전략 위치 탐색</button>
+                <button class="btn" onclick="batchBoardOperations()">배치 분석</button>
+            </div>
+            <div id="boardProgress" class="benchmark-progress">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="status-display" id="boardLog"></div>
+        </div>
+
+        <!-- 애니메이션 처리 데모 섹션 -->
+        <div class="demo-section">
+            <div class="demo-title">🎬 애니메이션 병렬 처리 데모</div>
+            <div class="control-panel">
+                <button class="btn" onclick="createSimpleAnimations()">기본 애니메이션</button>
+                <button class="btn" onclick="createComplexAnimations()">복합 애니메이션</button>
+                <button class="btn" onclick="createTimeline()">타임라인 애니메이션</button>
+                <button class="btn" onclick="startAnimationSystem()">애니메이션 시스템 시작</button>
+            </div>
+            <div id="animProgress" class="benchmark-progress">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="status-display" id="animLog"></div>
+        </div>
+
+        <!-- 성능 벤치마크 섹션 -->
+        <div class="demo-section">
+            <div class="demo-title">🚀 성능 벤치마크</div>
+            <div class="control-panel">
+                <button class="btn" onclick="runFullBenchmark()">전체 벤치마크 실행</button>
+                <button class="btn" onclick="runCardBenchmark()">카드 처리 벤치마크</button>
+                <button class="btn" onclick="runBoardBenchmark()">보드 분석 벤치마크</button>
+                <button class="btn" onclick="startMonitoring()">실시간 모니터링</button>
+                <button class="btn" onclick="stopMonitoring()">모니터링 중지</button>
+            </div>
+            <div class="performance-grid">
+                <div class="metric-card">
+                    <div class="metric-value" id="avgResponseTime">0ms</div>
+                    <div class="metric-label">평균 응답 시간</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="throughput">0/s</div>
+                    <div class="metric-label">처리량</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="workerUtilization">0%</div>
+                    <div class="metric-label">Worker 사용률</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="queueLength">0</div>
+                    <div class="metric-label">대기 중인 작업</div>
+                </div>
+            </div>
+            <div class="status-display" id="benchmarkLog"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import asyncGameController from './src/js/asyncGameController.js';
+        import workerManager from './src/js/workerManager.js';
+        import performanceBenchmark from './src/js/performanceBenchmark.js';
+
+        // 전역 변수로 설정하여 인라인 이벤트에서 접근 가능하게 함
+        window.asyncGameController = asyncGameController;
+        window.workerManager = workerManager;
+        window.performanceBenchmark = performanceBenchmark;
+        window.monitoringInterval = null;
+
+        // 로그 출력 함수들
+        function logToElement(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span> ${message}
+            `;
+            element.appendChild(logEntry);
+            element.scrollTop = element.scrollHeight;
+        }
+
+        // Worker 상태 업데이트
+        function updateWorkerStatus() {
+            const status = workerManager.getWorkerStatus();
+            const statusElement = document.getElementById('workerStatus');
+            
+            let statusHtml = '';
+            for (const [name, info] of Object.entries(status)) {
+                const className = info.isReady ? 'worker-ready' : 
+                                info.tasksInProgress > 0 ? 'worker-busy' : 'worker-error';
+                const statusText = info.isReady ? 
+                    (info.tasksInProgress > 0 ? `처리중 (${info.tasksInProgress})` : '준비됨') : '대기중';
+                
+                statusHtml += `<span class="worker-indicator ${className}">${name}: ${statusText}</span>`;
+            }
+            
+            statusElement.innerHTML = statusHtml;
+        }
+
+        // 진행률 업데이트
+        function updateProgress(elementId, progress) {
+            const progressBar = document.querySelector(`#${elementId} .progress-bar`);
+            if (progressBar) {
+                progressBar.style.width = `${progress}%`;
+            }
+        }
+
+        // 성능 메트릭 업데이트
+        function updatePerformanceMetrics() {
+            const metrics = asyncGameController.getPerformanceMetrics();
+            
+            document.getElementById('avgResponseTime').textContent = 
+                Math.round(metrics.averageEventTime || 0) + 'ms';
+                
+            document.getElementById('throughput').textContent = 
+                Math.round(metrics.eventsProcessed / 60 || 0) + '/s';
+                
+            document.getElementById('queueLength').textContent = 
+                metrics.queueLength || 0;
+                
+            // Worker 사용률 계산
+            const workerMetrics = workerManager.getPerformanceMetrics();
+            let totalUtilization = 0;
+            let workerCount = 0;
+            
+            if (workerMetrics.workers) {
+                for (const worker of Object.values(workerMetrics.workers)) {
+                    totalUtilization += worker.utilization || 0;
+                    workerCount++;
+                }
+            }
+            
+            const avgUtilization = workerCount > 0 ? totalUtilization / workerCount : 0;
+            document.getElementById('workerUtilization').textContent = 
+                Math.round(avgUtilization) + '%';
+        }
+
+        // 전역 함수들 (인라인 이벤트 핸들러용)
+        window.initializeWorkers = async function() {
+            try {
+                logToElement('workerLog', '🔧 Workers 초기화 중...');
+                await asyncGameController.initialize();
+                updateWorkerStatus();
+                logToElement('workerLog', '✅ Workers 초기화 완료');
+            } catch (error) {
+                logToElement('workerLog', `❌ 초기화 실패: ${error.message}`);
+            }
+        };
+
+        window.checkWorkerStatus = function() {
+            updateWorkerStatus();
+            const metrics = workerManager.getPerformanceMetrics();
+            logToElement('workerLog', `📊 성능 메트릭: ${JSON.stringify(metrics, null, 2)}`);
+        };
+
+        window.restartWorkers = async function() {
+            try {
+                logToElement('workerLog', '🔄 Workers 재시작 중...');
+                workerManager.destroy();
+                await asyncGameController.initialize();
+                updateWorkerStatus();
+                logToElement('workerLog', '✅ Workers 재시작 완료');
+            } catch (error) {
+                logToElement('workerLog', `❌ 재시작 실패: ${error.message}`);
+            }
+        };
+
+        // 카드 처리 함수들
+        window.shuffleCards = async function() {
+            try {
+                updateProgress('cardProgress', 20);
+                logToElement('cardLog', '🔀 덱 셔플 시작...');
+                
+                const cards = Array.from({length: 52}, (_, i) => ({id: i, type: 'test'}));
+                const result = await workerManager.shuffleDeck(cards);
+                
+                updateProgress('cardProgress', 100);
+                logToElement('cardLog', `✅ 덱 셔플 완료 (${result.data.processingTime}ms)`);
+                
+                setTimeout(() => updateProgress('cardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('cardLog', `❌ 덱 셔플 실패: ${error.message}`);
+            }
+        };
+
+        window.drawCards = async function() {
+            try {
+                updateProgress('cardProgress', 30);
+                logToElement('cardLog', '🎴 카드 뽑기 시작...');
+                
+                const result = await workerManager.drawCards('demo_deck', 5);
+                
+                updateProgress('cardProgress', 100);
+                logToElement('cardLog', `✅ 카드 뽑기 완료: ${result.data.result.cards.length}장 뽑음`);
+                
+                setTimeout(() => updateProgress('cardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('cardLog', `❌ 카드 뽑기 실패: ${error.message}`);
+            }
+        };
+
+        window.calculateEffectiveness = async function() {
+            try {
+                updateProgress('cardProgress', 50);
+                logToElement('cardLog', '⚔️ 카드 효과 계산 시작...');
+                
+                const guardian = {id: 'g001', type: 'light', power: 4};
+                const yokai = {id: 'y001', weakness: 'light', power: 3};
+                
+                const result = await workerManager.calculateCardEffectiveness(guardian, yokai);
+                
+                updateProgress('cardProgress', 100);
+                logToElement('cardLog', `✅ 효과 계산 완료: 승률 ${Math.round(result.data.result.winProbability * 100)}%`);
+                
+                setTimeout(() => updateProgress('cardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('cardLog', `❌ 효과 계산 실패: ${error.message}`);
+            }
+        };
+
+        window.batchCardOperations = async function() {
+            try {
+                updateProgress('cardProgress', 25);
+                logToElement('cardLog', '📦 배치 카드 처리 시작...');
+                
+                const operations = [
+                    {id: 1, category: 'card', type: 'SHUFFLE_DECK', data: {cards: []}},
+                    {id: 2, category: 'card', type: 'DRAW_CARDS', data: {deckId: 'batch', count: 3}},
+                    {id: 3, category: 'card', type: 'FILTER_CARDS', data: {cards: [], criteria: {type: 'yokai'}}}
+                ];
+                
+                updateProgress('cardProgress', 75);
+                const result = await workerManager.processBatchOperations(operations);
+                
+                updateProgress('cardProgress', 100);
+                logToElement('cardLog', `✅ 배치 처리 완료: ${result.data.successCount}/${result.data.totalOperations} 성공`);
+                
+                setTimeout(() => updateProgress('cardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('cardLog', `❌ 배치 처리 실패: ${error.message}`);
+            }
+        };
+
+        // 보드 분석 함수들
+        window.calculatePaths = async function() {
+            try {
+                updateProgress('boardProgress', 40);
+                logToElement('boardLog', '🗺️ 경로 계산 시작...');
+                
+                const result = await workerManager.calculateOptimalPaths(0, 24);
+                
+                updateProgress('boardProgress', 100);
+                logToElement('boardLog', `✅ 경로 계산 완료: ${result.data.result.length}개 경로 발견`);
+                
+                setTimeout(() => updateProgress('boardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('boardLog', `❌ 경로 계산 실패: ${error.message}`);
+            }
+        };
+
+        window.analyzeSafety = async function() {
+            try {
+                updateProgress('boardProgress', 60);
+                logToElement('boardLog', '🛡️ 안전도 분석 시작...');
+                
+                const boardState = {
+                    rooms: Array.from({length: 25}, (_, i) => ({id: i, hasYokai: i % 5 === 0})),
+                    players: [{id: 0, position: 5}, {id: 1, position: 10}]
+                };
+                
+                const result = await workerManager.analyzeRoomSafety(boardState);
+                
+                updateProgress('boardProgress', 100);
+                logToElement('boardLog', `✅ 안전도 분석 완료: 25개 방 분석됨`);
+                
+                setTimeout(() => updateProgress('boardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('boardLog', `❌ 안전도 분석 실패: ${error.message}`);
+            }
+        };
+
+        window.findStrategicPositions = async function() {
+            try {
+                updateProgress('boardProgress', 70);
+                logToElement('boardLog', '🎯 전략 위치 탐색 시작...');
+                
+                const boardState = {
+                    rooms: Array.from({length: 25}, (_, i) => ({
+                        id: i, 
+                        isSafeZone: i % 8 === 0,
+                        hasSpecialEffect: i % 6 === 0
+                    })),
+                    players: [{id: 0, position: 3}]
+                };
+                
+                const result = await workerManager.findStrategicPositions(boardState);
+                
+                updateProgress('boardProgress', 100);
+                logToElement('boardLog', `✅ 전략 위치 탐색 완료: ${result.data.result.length}개 위치 발견`);
+                
+                setTimeout(() => updateProgress('boardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('boardLog', `❌ 전략 위치 탐색 실패: ${error.message}`);
+            }
+        };
+
+        window.batchBoardOperations = async function() {
+            try {
+                updateProgress('boardProgress', 30);
+                logToElement('boardLog', '📦 배치 보드 분석 시작...');
+                
+                const operations = [
+                    {id: 1, category: 'board', type: 'CALCULATE_PATHS', data: {startPosition: 0, endPosition: 10}},
+                    {id: 2, category: 'board', type: 'ANALYZE_ROOM_SAFETY', data: {boardState: {rooms: [], players: []}}},
+                    {id: 3, category: 'board', type: 'FIND_STRATEGIC_POSITIONS', data: {boardState: {rooms: [], players: []}}}
+                ];
+                
+                updateProgress('boardProgress', 80);
+                const result = await workerManager.processBatchOperations(operations);
+                
+                updateProgress('boardProgress', 100);
+                logToElement('boardLog', `✅ 배치 분석 완료: ${result.data.successCount}/${result.data.totalOperations} 성공`);
+                
+                setTimeout(() => updateProgress('boardProgress', 0), 1000);
+            } catch (error) {
+                logToElement('boardLog', `❌ 배치 분석 실패: ${error.message}`);
+            }
+        };
+
+        // 애니메이션 함수들
+        window.createSimpleAnimations = async function() {
+            try {
+                updateProgress('animProgress', 40);
+                logToElement('animLog', '🎬 기본 애니메이션 생성 중...');
+                
+                const animations = Array.from({length: 5}, (_, i) => ({
+                    id: `simple_${i}`,
+                    type: 'MOVE',
+                    duration: 500,
+                    startState: {x: 0, y: 0},
+                    endState: {x: 100 + i * 20, y: 50 + i * 10},
+                    easing: 'easeOutQuad'
+                }));
+                
+                for (const anim of animations) {
+                    await workerManager.addAnimation(anim);
+                }
+                
+                updateProgress('animProgress', 100);
+                logToElement('animLog', `✅ 기본 애니메이션 ${animations.length}개 생성 완료`);
+                
+                setTimeout(() => updateProgress('animProgress', 0), 1000);
+            } catch (error) {
+                logToElement('animLog', `❌ 기본 애니메이션 생성 실패: ${error.message}`);
+            }
+        };
+
+        window.createComplexAnimations = async function() {
+            try {
+                updateProgress('animProgress', 60);
+                logToElement('animLog', '🌟 복합 애니메이션 생성 중...');
+                
+                const complexAnim = {
+                    id: 'complex_demo',
+                    type: 'COMPLEX',
+                    duration: 1000,
+                    keyframes: [
+                        {opacity: 0, scale: 0.5, rotation: 0},
+                        {opacity: 0.5, scale: 1.2, rotation: 180},
+                        {opacity: 1, scale: 1, rotation: 360}
+                    ],
+                    easing: 'easeInOutCubic'
+                };
+                
+                await workerManager.addAnimation(complexAnim);
+                
+                updateProgress('animProgress', 100);
+                logToElement('animLog', '✅ 복합 애니메이션 생성 완료');
+                
+                setTimeout(() => updateProgress('animProgress', 0), 1000);
+            } catch (error) {
+                logToElement('animLog', `❌ 복합 애니메이션 생성 실패: ${error.message}`);
+            }
+        };
+
+        window.createTimeline = async function() {
+            try {
+                updateProgress('animProgress', 80);
+                logToElement('animLog', '⏱️ 타임라인 애니메이션 생성 중...');
+                
+                const timeline = {
+                    id: 'timeline_demo',
+                    duration: 2000,
+                    animations: [
+                        {delay: 0, duration: 500, type: 'FADE', target: 'element1'},
+                        {delay: 300, duration: 600, type: 'SCALE', target: 'element2'},
+                        {delay: 800, duration: 400, type: 'MOVE', target: 'element3'}
+                    ]
+                };
+                
+                await workerManager.createTimeline(timeline);
+                
+                updateProgress('animProgress', 100);
+                logToElement('animLog', '✅ 타임라인 애니메이션 생성 완료');
+                
+                setTimeout(() => updateProgress('animProgress', 0), 1000);
+            } catch (error) {
+                logToElement('animLog', `❌ 타임라인 애니메이션 생성 실패: ${error.message}`);
+            }
+        };
+
+        window.startAnimationSystem = function() {
+            try {
+                workerManager.startAnimationSystem();
+                logToElement('animLog', '▶️ 애니메이션 시스템 시작됨');
+            } catch (error) {
+                logToElement('animLog', `❌ 애니메이션 시스템 시작 실패: ${error.message}`);
+            }
+        };
+
+        // 벤치마크 함수들
+        window.runFullBenchmark = async function() {
+            try {
+                logToElement('benchmarkLog', '🚀 전체 벤치마크 시작...');
+                const result = await performanceBenchmark.runFullBenchmark();
+                logToElement('benchmarkLog', result.consoleOutput);
+            } catch (error) {
+                logToElement('benchmarkLog', `❌ 벤치마크 실패: ${error.message}`);
+            }
+        };
+
+        window.runCardBenchmark = async function() {
+            try {
+                logToElement('benchmarkLog', '🎴 카드 처리 벤치마크 시작...');
+                await performanceBenchmark.ensureWorkersInitialized();
+                const result = await performanceBenchmark.benchmarkCardProcessing();
+                logToElement('benchmarkLog', `✅ 카드 벤치마크 완료: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                logToElement('benchmarkLog', `❌ 카드 벤치마크 실패: ${error.message}`);
+            }
+        };
+
+        window.runBoardBenchmark = async function() {
+            try {
+                logToElement('benchmarkLog', '🗺️ 보드 분석 벤치마크 시작...');
+                await performanceBenchmark.ensureWorkersInitialized();
+                const result = await performanceBenchmark.benchmarkBoardAnalysis();
+                logToElement('benchmarkLog', `✅ 보드 벤치마크 완료: ${JSON.stringify(result, null, 2)}`);
+            } catch (error) {
+                logToElement('benchmarkLog', `❌ 보드 벤치마크 실패: ${error.message}`);
+            }
+        };
+
+        window.startMonitoring = function() {
+            if (window.monitoringInterval) {
+                clearInterval(window.monitoringInterval);
+            }
+            
+            performanceBenchmark.startPerformanceMonitoring(2000);
+            
+            // 실시간 메트릭 업데이트
+            window.monitoringInterval = setInterval(() => {
+                updateWorkerStatus();
+                updatePerformanceMetrics();
+            }, 1000);
+            
+            logToElement('benchmarkLog', '📈 실시간 모니터링 시작');
+        };
+
+        window.stopMonitoring = function() {
+            performanceBenchmark.stopPerformanceMonitoring();
+            
+            if (window.monitoringInterval) {
+                clearInterval(window.monitoringInterval);
+                window.monitoringInterval = null;
+            }
+            
+            logToElement('benchmarkLog', '⏹️ 실시간 모니터링 중지');
+        };
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            logToElement('workerLog', '🏰 요괴의 성 탈출 - Web Workers 데모 로드됨');
+            logToElement('workerLog', '💡 "Workers 초기화" 버튼을 클릭하여 시작하세요');
+        });
+    </script>
+</body>
+</html>
