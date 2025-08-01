@@ -4,29 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>요괴의 성 탈출</title>
-    <link rel="stylesheet" href="src/styles/main.css">
-    <link rel="stylesheet" href="src/styles/board-original.css">
-    <link rel="stylesheet" href="src/styles/cards-new.css">
+    <link rel="stylesheet" href="src/styles/game.css">
 </head>
 <body>
     <div id="game-container">
         <div id="game-board" class="game-board">
-            <!-- 게임 보드 컨텐츠 -->
+            <!-- 게임 보드는 BoardSystem에서 동적으로 생성됩니다 -->
         </div>
-        <div id="card-deck" class="card-deck">
-            <!-- 카드 덱 영역 -->
-        </div>
-        <div id="player-area" class="player-area">
-            <!-- 플레이어 정보 영역 -->
+        
+        <div class="game-sidebar">
+            <!-- 게임 상태 섹션 -->
+            <div class="ui-section">
+                <div class="ui-section-title">게임 상태</div>
+                <div class="game-status">
+                    <div class="turn-info">
+                        <div id="current-player" class="current-player">플레이어 1 턴</div>
+                        <div id="phase-indicator" class="phase-indicator">이동 단계</div>
+                    </div>
+                    <div class="dice-area">
+                        <div class="dice-display">
+                            <div id="dice-result" class="dice-result">🎲 ?</div>
+                        </div>
+                        <button class="action-button" id="roll-dice">주사위 굴리기</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 플레이어 정보 섹션 -->
+            <div class="ui-section">
+                <div class="ui-section-title">플레이어 정보</div>
+                <div class="player-info">
+                    <div class="player-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">위치</span>
+                            <span class="stat-value" id="player-position">시작점</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">카드</span>
+                            <span class="stat-value" id="player-cards">0장</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">승리 조건</span>
+                            <span class="stat-value" id="victory-condition">탈출</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">점수</span>
+                            <span class="stat-value" id="player-score">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 액션 버튼 섹션 -->
+            <div class="ui-section">
+                <div class="ui-section-title">게임 액션</div>
+                <div class="action-buttons">
+                    <button class="action-button" id="move-player">이동하기</button>
+                    <button class="action-button" id="use-card">카드 사용</button>
+                    <button class="action-button" id="end-turn">턴 종료</button>
+                    <button class="action-button" id="pause-game">게임 일시정지</button>
+                </div>
+            </div>
+            
+            <!-- 손패 카드 섹션 -->
+            <div class="ui-section">
+                <div class="ui-section-title">손패 카드</div>
+                <div class="hand-cards" id="hand-cards">
+                    <!-- 카드들이 동적으로 추가됩니다 -->
+                </div>
+            </div>
+            
+            <!-- 게임 로그 섹션 -->
+            <div class="ui-section">
+                <div class="ui-section-title">게임 로그</div>
+                <div class="game-log" id="game-log">
+                    <div class="log-entry info">게임이 시작되었습니다.</div>
+                </div>
+            </div>
         </div>
     </div>
     
     <script type="module">
-        import OriginalYokaiCastleGame from './src/js/game-original.js';
+        // CLAUDE.md 규칙에 따른 클린 ES6 모듈 시스템
+        import { GameController } from './src/js/GameController.js';
+        import { BoardSystem } from './src/js/BoardSystem.js';
+        import { CardSystem } from './src/js/CardSystem.js';
+        import { BoardData } from './src/js/BoardData.js';
         
-        // 게임 인스턴스 생성 및 시작
-        window.game = new OriginalYokaiCastleGame();
-        window.game.init();
+        console.log('요괴의 성 탈출 - 통합 시스템 시작');
+        
+        try {
+            // 통합 게임 컨트롤러 생성 및 초기화
+            console.log('🎮 GameController 생성 중...');
+            window.gameController = new GameController();
+            
+            console.log('🎮 GameController 초기화 중...');
+            window.gameController.init();
+            
+            console.log('✅ 게임 시스템이 성공적으로 초기화되었습니다.');
+            
+            // 디버깅을 위한 전역 접근
+            window.boardSystem = window.gameController.boardSystem;
+            window.cardSystem = window.gameController.cardSystem;
+            
+            // 게임 상태 표시
+            console.log('🎯 게임 상태:', window.gameController.gameState);
+            console.log('🎮 게임 모드:', window.gameController.gameMode);
+            
+        } catch (error) {
+            console.error('❌ 게임 초기화 실패:', error);
+            console.error('❌ 오류 상세:', error.stack);
+            
+            // 사용자에게 오류 알림
+            document.body.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: #2a1f3a;
+                    color: #e0e0e0;
+                    padding: 2rem;
+                    border: 2px solid #8a2be2;
+                    border-radius: 15px;
+                    text-align: center;
+                    font-family: 'Noto Sans KR', sans-serif;
+                    box-shadow: 0 0 30px rgba(138, 43, 226, 0.6);
+                ">
+                    <h2>게임 로딩 실패</h2>
+                    <p>게임을 불러오는 중 오류가 발생했습니다.</p>
+                    <p>브라우저 콘솔을 확인해주세요.</p>
+                    <button onclick="location.reload()" style="
+                        background: #4a1f5f;
+                        color: #e0e0e0;
+                        border: 2px solid #6a2f8f;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        cursor: pointer;
+                        margin-top: 1rem;
+                    ">새로고침</button>
+                </div>
+            `;
+        }
     </script>
 </body>
 </html>

@@ -1,0 +1,1372 @@
+/**
+ * 요괴의 성 탈출 - 통합 게임 스타일
+ * CLAUDE.md 규칙에 따른 클린 CSS 구현
+ */
+
+/* ==========================================================================
+   Base Styles - 기본 스타일
+   ========================================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Color Palette */
+    --color-primary: #8a2be2;
+    --color-secondary: #4ecdc4;
+    --color-dark: #1a0f1f;
+    --color-light: #e0e0e0;
+    --color-accent: #ffd700;
+    --color-danger: #ff6b6b;
+    --color-success: #4a8f4a;
+    
+    /* Typography */
+    --font-family: 'Noto Sans KR', sans-serif;
+    --font-size-small: 10px;
+    --font-size-normal: 14px;
+    --font-size-large: 18px;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Shadows */
+    --shadow-light: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-normal: 0 4px 8px rgba(0, 0, 0, 0.2);
+    --shadow-heavy: 0 8px 16px rgba(0, 0, 0, 0.3);
+    --shadow-glow: 0 0 20px rgba(138, 43, 226, 0.5);
+}
+
+body {
+    font-family: var(--font-family);
+    background: linear-gradient(135deg, var(--color-dark) 0%, #2a1f3a 50%, var(--color-dark) 100%);
+    color: var(--color-light);
+    overflow: hidden;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* ==========================================================================
+   Layout - 레이아웃
+   ========================================================================== */
+
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    position: relative;
+    background: 
+        radial-gradient(circle at 20% 80%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+    overflow: hidden;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.game-board {
+    flex: 1;
+    min-width: 0;
+    height: calc(100vh - 16px);
+    background: 
+        radial-gradient(ellipse at center, rgba(74, 31, 95, 0.4) 0%, transparent 70%),
+        linear-gradient(135deg, #0a0515 0%, #1a0f2a 30%, #2a1f3a 70%, #0a0515 100%);
+    border-right: 4px solid transparent;
+    border-image: linear-gradient(45deg, var(--color-primary), var(--color-secondary)) 1;
+    position: relative;
+    padding: 20px;
+    box-shadow: 
+        0 0 60px rgba(138, 43, 226, 0.6),
+        inset 0 0 150px rgba(0, 0, 0, 0.9);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-sidebar {
+    width: 350px;
+    height: calc(100vh - 16px);
+    border-radius: 8px;
+    background: 
+        linear-gradient(180deg, #1a0f2a 0%, #2a1f3a 50%, #1a0f2a 100%);
+    border-left: 2px solid rgba(138, 43, 226, 0.3);
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    box-shadow: inset 2px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* UI 섹션 스타일 */
+.ui-section {
+    background: rgba(42, 31, 58, 0.6);
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    border-radius: 10px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--shadow-normal);
+}
+
+.ui-section-title {
+    color: var(--color-secondary);
+    font-size: var(--font-size-normal);
+    font-weight: bold;
+    margin-bottom: var(--spacing-sm);
+    text-align: center;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.3);
+    padding-bottom: var(--spacing-xs);
+}
+
+.game-status {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.turn-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.current-player {
+    color: var(--color-accent);
+    font-weight: bold;
+    font-size: var(--font-size-normal);
+}
+
+.phase-indicator {
+    color: var(--color-light);
+    font-size: var(--font-size-small);
+    opacity: 0.8;
+}
+
+.dice-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.dice-display {
+    background: rgba(26, 15, 42, 0.8);
+    border: 2px solid rgba(138, 43, 226, 0.5);
+    border-radius: 10px;
+    padding: var(--spacing-md);
+    text-align: center;
+    min-width: 80px;
+}
+
+.dice-result {
+    font-size: 32px;
+    color: var(--color-accent);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.player-info .player-stats {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-xs) 0;
+    border-bottom: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.stat-label {
+    color: var(--color-light);
+    font-size: var(--font-size-small);
+    opacity: 0.8;
+}
+
+.stat-value {
+    color: var(--color-secondary);
+    font-weight: bold;
+    font-size: var(--font-size-small);
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.action-button {
+    background: linear-gradient(135deg, #4a1f5f 0%, #2a0f3f 100%);
+    border: 2px solid #6a2f8f;
+    color: var(--color-light);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: var(--font-size-small);
+    transition: all var(--transition-normal);
+    text-align: center;
+    font-weight: bold;
+}
+
+.action-button:hover {
+    background: linear-gradient(135deg, #5a2f6f 0%, #3a1f4f 100%);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+}
+
+.action-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.hand-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    min-height: 60px;
+    max-height: 200px;
+    padding: 8px;
+    background: rgba(26, 15, 42, 0.6);
+    border-radius: 8px;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+    overflow-y: auto;
+    overflow-x: hidden;
+    justify-content: center;
+}
+
+.card-mini {
+    background: linear-gradient(135deg, #2a1f3a 0%, #1a0f2a 100%);
+    border: 1px solid rgba(138, 43, 226, 0.5);
+    border-radius: 6px;
+    padding: var(--spacing-xs);
+    min-width: 60px;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.card-mini:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(138, 43, 226, 0.3);
+}
+
+.card-mini-name {
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--color-light);
+    margin-bottom: 2px;
+}
+
+.card-mini-type {
+    font-size: 8px;
+    color: var(--color-secondary);
+    opacity: 0.8;
+}
+
+.game-log {
+    background: rgba(26, 15, 42, 0.8);
+    border-radius: 8px;
+    padding: var(--spacing-sm);
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid rgba(138, 43, 226, 0.3);
+}
+
+.log-entry {
+    font-size: var(--font-size-small);
+    margin-bottom: var(--spacing-xs);
+    padding: var(--spacing-xs);
+    border-radius: 4px;
+}
+
+.log-entry.info {
+    color: var(--color-secondary);
+    background: rgba(78, 205, 196, 0.1);
+}
+
+.log-entry.warning {
+    color: var(--color-accent);
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.log-entry.error {
+    color: var(--color-danger);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+/* ==========================================================================
+   Game Board - 게임 보드
+   ========================================================================== */
+
+.game-path {
+    position: absolute;
+    width: calc(100% - 80px);
+    height: calc(100% - 80px);
+    top: 40px;
+    left: 40px;
+}
+
+.board-room {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: 
+        linear-gradient(135deg, #1a0f2a 0%, #2a1f3a 50%, #0f0520 100%),
+        radial-gradient(circle at 30% 70%, rgba(138, 43, 226, 0.1) 0%, transparent 70%);
+    border: 3px solid transparent;
+    border-image: linear-gradient(45deg, rgba(138, 43, 226, 0.8), rgba(78, 205, 196, 0.8)) 1;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    overflow: hidden;
+    font-size: var(--font-size-small);
+    text-align: center;
+    padding: var(--spacing-sm);
+    box-shadow: 
+        var(--shadow-heavy),
+        0 0 20px rgba(138, 43, 226, 0.2),
+        inset 0 0 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(1px);
+}
+
+.board-room:hover {
+    background: 
+        linear-gradient(135deg, #2a1f3a 0%, #3a2f4a 50%, #1f1530 100%),
+        radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.2) 0%, transparent 70%);
+    border-image: linear-gradient(45deg, rgba(138, 43, 226, 1), rgba(78, 205, 196, 1)) 1;
+    box-shadow: 
+        0 0 30px rgba(138, 43, 226, 0.8),
+        0 0 60px rgba(78, 205, 196, 0.4),
+        var(--shadow-heavy);
+    transform: scale(1.05) translateY(-3px);
+}
+
+.room-number {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-sm);
+    font-size: 11px;
+    color: var(--color-light);
+    font-weight: bold;
+    background: linear-gradient(135deg, rgba(138, 43, 226, 0.8), rgba(0, 0, 0, 0.8));
+    padding: 3px 6px;
+    border-radius: 6px;
+    border: 1px solid rgba(138, 43, 226, 0.5);
+    box-shadow: var(--shadow-glow);
+}
+
+.room-name {
+    font-size: 11px;
+    color: var(--color-light);
+    text-shadow: 0 0 8px rgba(0, 0, 0, 0.9);
+    margin-top: var(--spacing-xs);
+    line-height: 1.2;
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
+
+.room-icon {
+    font-size: 36px;
+    margin-bottom: var(--spacing-xs);
+    filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.9));
+}
+
+.room-players {
+    position: absolute;
+    bottom: var(--spacing-xs);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+/* Room Types */
+.board-room.start-room {
+    background: 
+        radial-gradient(circle at 30% 30%, var(--color-success) 0%, #2a5f2a 40%, #0f2f0f 100%);
+    border-image: linear-gradient(45deg, var(--color-success), #6fbf6f) 1;
+    box-shadow: 
+        var(--shadow-heavy),
+        0 0 30px rgba(74, 143, 74, 0.6);
+}
+
+.board-room.end-room {
+    background: 
+        radial-gradient(circle at 50% 50%, #8f4a4a 0%, #5f2a2a 30%, #2f0f0f 100%),
+        radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.2) 0%, transparent 50%);
+    border-image: linear-gradient(45deg, #8f4a4a, var(--color-accent)) 1;
+    box-shadow: 
+        var(--shadow-heavy),
+        0 0 40px rgba(143, 74, 74, 0.8),
+        0 0 80px rgba(255, 215, 0, 0.4);
+}
+
+.board-room.yokai-room {
+    background: 
+        radial-gradient(circle at 40% 60%, #6a3f8a 0%, #3a1f4a 40%, #1a0f2a 100%);
+    border-image: linear-gradient(45deg, #6a3f8a, var(--color-primary)) 1;
+    box-shadow: 
+        var(--shadow-heavy),
+        0 0 25px rgba(106, 63, 138, 0.6);
+}
+
+.board-room.safe-room {
+    background: 
+        radial-gradient(circle at 30% 30%, var(--color-success) 0%, #2a5f2a 40%, #0f2f0f 100%);
+    border-image: linear-gradient(45deg, var(--color-success), #6fbf6f) 1;
+    box-shadow: 
+        var(--shadow-heavy),
+        0 0 25px rgba(74, 143, 74, 0.6);
+}
+
+.board-room.guardian-room {
+    background: 
+        radial-gradient(circle at 60% 40%, var(--color-secondary) 0%, #4a3f1a 40%, #2a1f0a 100%);
+    border-image: linear-gradient(45deg, var(--color-secondary), var(--color-accent)) 1;
+    box-shadow: 
+        var(--shadow-heavy),
+        0 0 25px rgba(78, 205, 196, 0.6);
+}
+
+.board-room.special-room {
+    background: 
+        radial-gradient(circle at 60% 40%, #8a7f3a 0%, #4a3f1a 40%, #2a1f0a 100%),
+        radial-gradient(circle at 20% 80%, rgba(255, 215, 0, 0.15) 0%, transparent 50%);
+    border-image: linear-gradient(45deg, #8a7f3a, var(--color-accent)) 1;
+    box-shadow: 
+        var(--shadow-heavy),
+        0 0 25px rgba(138, 127, 58, 0.6);
+}
+
+/* Movement Indicators */
+.board-room.possible-move {
+    border-color: rgba(0, 255, 0, 0.8);
+    box-shadow: 
+        0 0 20px rgba(0, 255, 0, 0.8),
+        var(--shadow-heavy);
+}
+
+.board-room.highlighted {
+    box-shadow: 
+        0 0 30px var(--color-accent),
+        var(--shadow-heavy);
+}
+
+.board-room.target-room {
+    animation: targetPulse 0.5s ease-in-out;
+}
+
+/* ==========================================================================
+   Board Connections - 보드 연결선
+   ========================================================================== */
+
+.board-connections {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.board-connections line {
+    stroke: rgba(138, 43, 226, 0.3);
+    stroke-width: 2;
+    stroke-dasharray: 5,5;
+}
+
+/* ==========================================================================
+   Guardian Deck Area - 수호신 덱 영역
+   ========================================================================== */
+
+.guardian-deck-area {
+    position: absolute;
+    background: 
+        radial-gradient(ellipse at center, rgba(26, 15, 42, 0.98) 0%, rgba(10, 5, 21, 0.95) 100%),
+        linear-gradient(135deg, rgba(78, 205, 196, 0.1) 0%, transparent 50%, rgba(138, 43, 226, 0.1) 100%);
+    border: 4px solid transparent;
+    border-image: linear-gradient(45deg, var(--color-secondary), #6fcfef, var(--color-primary)) 1;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 25px;
+    box-shadow: 
+        0 0 50px rgba(78, 205, 196, 0.7),
+        0 0 100px rgba(138, 43, 226, 0.4),
+        inset 0 0 50px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+    backdrop-filter: blur(3px);
+}
+
+.deck-title {
+    color: var(--color-secondary);
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    text-shadow: 
+        0 0 10px rgba(78, 205, 196, 0.8),
+        0 0 20px rgba(78, 205, 196, 0.4);
+}
+
+.guardian-card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    height: 280px;
+}
+
+.guardian-deck-card {
+    background: 
+        linear-gradient(135deg, #1f3a4a 0%, #2f4a5a 50%, #0f1a2a 100%),
+        radial-gradient(circle at 30% 70%, rgba(78, 205, 196, 0.1) 0%, transparent 70%);
+    border: 3px solid transparent;
+    border-image: linear-gradient(45deg, var(--color-secondary), #6fcfef) 1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    color: var(--color-secondary);
+    font-size: 12px;
+    padding: var(--spacing-sm);
+    box-shadow: 
+        var(--shadow-normal),
+        0 0 15px rgba(78, 205, 196, 0.2);
+    backdrop-filter: blur(1px);
+}
+
+.guardian-deck-card:hover {
+    background: linear-gradient(135deg, #2f4a5a 0%, #1f2a3a 100%);
+    box-shadow: 0 0 10px rgba(78, 205, 196, 0.6);
+    transform: scale(1.05);
+}
+
+/* ==========================================================================
+   Player Pieces - 플레이어 말
+   ========================================================================== */
+
+.player-piece {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    transform-origin: center;
+    flex-shrink: 0;
+}
+
+/* Player 1 - 파란색 3D 스타일 */
+.player-piece[data-player="1"] {
+    background: radial-gradient(circle at 30% 30%, #87ceeb, #4169e1, #1e3a8a);
+    border: 3px solid #ffffff;
+    box-shadow: 
+        0 6px 12px rgba(65, 105, 225, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        0 0 20px rgba(65, 105, 225, 0.6);
+}
+
+/* Player 2 - 빨간색 3D 스타일 */
+.player-piece[data-player="2"] {
+    background: radial-gradient(circle at 30% 30%, #ff6b9d, #dc2626, #7f1d1d);
+    border: 3px solid #ffffff;
+    box-shadow: 
+        0 6px 12px rgba(220, 38, 38, 0.4),
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        0 0 20px rgba(220, 38, 38, 0.6);
+}
+
+/* 활성 플레이어 효과 */
+.player-piece.active {
+    animation: activePulse 1.5s infinite ease-in-out;
+    transform: scale(1.1);
+    z-index: 15;
+}
+
+/* 활성 플레이어 맥박 애니메이션 */
+@keyframes activePulse {
+    0%, 100% { 
+        box-shadow: 
+            0 6px 12px rgba(var(--player-color), 0.4),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            0 0 20px rgba(var(--player-color), 0.8);
+    }
+    50% { 
+        box-shadow: 
+            0 8px 16px rgba(var(--player-color), 0.6),
+            inset 0 2px 4px rgba(255, 255, 255, 0.3),
+            0 0 30px rgba(var(--player-color), 1);
+        transform: scale(1.05);
+    }
+}
+
+.player-piece.moving {
+    animation: smoothMove 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Cards - 카드
+   ========================================================================== */
+
+.card {
+    width: 90px;
+    height: 125px;
+    background: 
+        linear-gradient(145deg, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+        linear-gradient(135deg, #2a1f3a 0%, #1a0f2a 50%, #0f0a15 100%);
+    border: 2px solid transparent;
+    border-image: linear-gradient(45deg, rgba(138, 43, 226, 0.6), rgba(78, 205, 196, 0.4)) 1;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all var(--transition-normal);
+    padding: 8px;
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 1px 2px rgba(255, 255, 255, 0.1);
+    margin: 3px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 카드 반짝임 효과 */
+.card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transform: rotate(45deg);
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* 카드 호버 효과 */
+.card:hover::before {
+    opacity: 1;
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+.card:hover {
+    border-image: linear-gradient(45deg, rgba(138, 43, 226, 1), rgba(78, 205, 196, 0.8)) 1;
+    box-shadow: 
+        0 8px 16px rgba(138, 43, 226, 0.4),
+        0 0 20px rgba(138, 43, 226, 0.6),
+        inset 0 1px 2px rgba(255, 255, 255, 0.2);
+    transform: translateY(-5px) scale(1.05);
+}
+
+.card.yokai {
+    border-color: rgba(138, 43, 226, 0.8);
+    background: linear-gradient(135deg, #3a1f4a 0%, #2a0f3a 100%);
+}
+
+.card.guardian {
+    border-color: rgba(78, 205, 196, 0.8);
+    background: linear-gradient(135deg, #1f4a3a 0%, #0f3a2a 100%);
+}
+
+.card.movement {
+    border-color: rgba(255, 215, 0, 0.8);
+    background: linear-gradient(135deg, #4a3f1a 0%, #3a2f0a 100%);
+}
+
+.card.special {
+    border-color: rgba(255, 107, 107, 0.8);
+    background: linear-gradient(135deg, #4a1f1f 0%, #3a0f0f 100%);
+}
+
+.card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    height: 100%;
+}
+
+.card-icon {
+    font-size: 24px;
+    margin-bottom: var(--spacing-xs);
+}
+
+.card-title {
+    font-size: 11px;
+    font-weight: bold;
+    margin-bottom: var(--spacing-xs);
+    color: var(--color-light);
+}
+
+.card-power,
+.card-value,
+.card-weakness,
+.card-description {
+    font-size: 9px;
+    color: rgba(224, 224, 224, 0.8);
+    margin-bottom: 2px;
+    line-height: 1.2;
+}
+
+/* ==========================================================================
+   UI Components - UI 컴포넌트
+   ========================================================================== */
+
+.game-button {
+    background: linear-gradient(135deg, #4a1f5f 0%, #2a0f3f 100%);
+    border: 2px solid #6a2f8f;
+    color: var(--color-light);
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: var(--font-size-normal);
+    transition: all var(--transition-normal);
+    text-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
+}
+
+.game-button:hover {
+    background: linear-gradient(135deg, #5a2f6f 0%, #3a1f4f 100%);
+    box-shadow: var(--shadow-glow);
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(26, 15, 42, 0.95);
+    border: 2px solid var(--color-secondary);
+    border-radius: 10px;
+    padding: var(--spacing-md);
+    color: var(--color-light);
+    z-index: 1000;
+    min-width: 200px;
+    box-shadow: var(--shadow-glow);
+    animation: slideIn 0.3s ease-out;
+}
+
+.notification.info {
+    border-color: var(--color-secondary);
+}
+
+.notification.warning {
+    border-color: var(--color-accent);
+}
+
+.notification.error {
+    border-color: var(--color-danger);
+}
+
+.notification.success {
+    border-color: var(--color-success);
+}
+
+/* ==========================================================================
+   Animations - 애니메이션
+   ========================================================================== */
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes targetPulse {
+    0%, 100% {
+        box-shadow: 
+            0 0 20px var(--color-accent),
+            var(--shadow-heavy);
+    }
+    50% {
+        box-shadow: 
+            0 0 40px var(--color-accent),
+            0 0 60px var(--color-accent),
+            var(--shadow-heavy);
+    }
+}
+
+/* 부드러운 이동 애니메이션 */
+@keyframes smoothMove {
+    0% {
+        transform: scale(1) translateY(0);
+    }
+    25% {
+        transform: scale(1.1) translateY(-8px);
+    }
+    50% {
+        transform: scale(1.15) translateY(-12px);
+    }
+    75% {
+        transform: scale(1.1) translateY(-8px);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* 카드 반짝임 애니메이션 */
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%) translateY(-100%) rotate(45deg);
+    }
+    100% {
+        transform: translateX(100%) translateY(100%) rotate(45deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0) translateX(-50%);
+    }
+    40% {
+        transform: translateY(-10px) translateX(-50%);
+    }
+    60% {
+        transform: translateY(-5px) translateX(-50%);
+    }
+}
+
+/* ==========================================================================
+   Responsive Design - 반응형 디자인
+   ========================================================================== */
+
+@media (max-width: 1200px) {
+    .game-board {
+        width: calc(100% - 300px);
+        padding: var(--spacing-lg);
+    }
+    
+    .game-sidebar {
+        width: 300px;
+        padding: var(--spacing-md);
+    }
+    
+    .board-room {
+        width: 120px;
+        height: 120px;
+        font-size: 10px;
+    }
+    
+    .room-icon {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 768px) {
+    #game-container {
+        flex-direction: column;
+    }
+    
+    .game-board {
+        width: 100%;
+        height: 70vh;
+        padding: var(--spacing-md);
+    }
+    
+    .game-sidebar {
+        width: 100%;
+        height: 30vh;
+        padding: var(--spacing-sm);
+    }
+    
+    .board-room {
+        width: 80px;
+        height: 80px;
+        font-size: 9px;
+    }
+    
+    .room-icon {
+        font-size: 22px;
+    }
+    
+    .guardian-deck-area {
+        width: 280px !important;
+        height: 340px !important;
+        padding: 15px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .board-room {
+        width: 60px;
+        height: 60px;
+        font-size: 8px;
+    }
+    
+    .room-icon {
+        font-size: 18px;
+    }
+    
+    .guardian-deck-area {
+        width: 240px !important;
+        height: 300px !important;
+    }
+    
+    .card {
+        width: 80px;
+        height: 110px;
+        font-size: 8px;
+    }
+}
+
+/* ==========================================================================
+   Utility Classes - 유틸리티 클래스
+   ========================================================================== */
+
+.hidden {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.mb-0 { margin-bottom: 0; }
+.mb-1 { margin-bottom: var(--spacing-xs); }
+.mb-2 { margin-bottom: var(--spacing-sm); }
+.mb-3 { margin-bottom: var(--spacing-md); }
+.mb-4 { margin-bottom: var(--spacing-lg); }
+
+.p-0 { padding: 0; }
+.p-1 { padding: var(--spacing-xs); }
+.p-2 { padding: var(--spacing-sm); }
+.p-3 { padding: var(--spacing-md); }
+.p-4 { padding: var(--spacing-lg); }
+
+/* ==========================================================================
+   Yokai Popup - 요괴 팝업
+   ========================================================================== */
+
+.yokai-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: 
+        radial-gradient(ellipse at center, rgba(26, 15, 42, 0.98) 0%, rgba(10, 5, 21, 0.95) 100%),
+        linear-gradient(135deg, rgba(138, 43, 226, 0.2) 0%, transparent 50%, rgba(220, 38, 38, 0.2) 100%);
+    border: 4px solid transparent;
+    border-image: linear-gradient(45deg, var(--color-primary), var(--color-danger)) 1;
+    border-radius: 20px;
+    padding: var(--spacing-xl);
+    box-shadow: 
+        0 0 60px rgba(138, 43, 226, 0.8),
+        0 0 120px rgba(220, 38, 38, 0.4),
+        inset 0 0 50px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    max-width: 500px;
+    min-width: 400px;
+    backdrop-filter: blur(5px);
+    animation: popupAppear 0.3s ease-out;
+}
+
+@keyframes popupAppear {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.yokai-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.yokai-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.yokai-icon-large {
+    font-size: 80px;
+    margin-bottom: var(--spacing-sm);
+    filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.8));
+    animation: yokaiFloat 3s ease-in-out infinite;
+}
+
+@keyframes yokaiFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.yokai-name {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--color-danger);
+    text-shadow: 
+        0 0 20px rgba(220, 38, 38, 0.8),
+        0 0 40px rgba(220, 38, 38, 0.4);
+    margin-bottom: var(--spacing-sm);
+}
+
+.yokai-description {
+    font-size: var(--font-size-normal);
+    color: var(--color-light);
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.9;
+}
+
+.yokai-stats {
+    display: flex;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
+}
+
+.yokai-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.yokai-stat-label {
+    font-size: var(--font-size-small);
+    color: var(--color-light);
+    opacity: 0.7;
+}
+
+.yokai-stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-accent);
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.yokai-dice-requirement {
+    background: rgba(138, 43, 226, 0.1);
+    border: 2px solid rgba(138, 43, 226, 0.3);
+    border-radius: 12px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+}
+
+.yokai-dice-label {
+    font-size: var(--font-size-normal);
+    color: var(--color-secondary);
+    margin-bottom: var(--spacing-sm);
+}
+
+.yokai-dice-numbers {
+    display: flex;
+    gap: var(--spacing-sm);
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.dice-number {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #2a1f3a 0%, #1a0f2a 100%);
+    border: 2px solid var(--color-primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--color-accent);
+    box-shadow: 
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        inset 0 0 10px rgba(138, 43, 226, 0.2);
+}
+
+.yokai-action-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+    width: 100%;
+}
+
+.roll-dice-button {
+    flex: 1;
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #6a2f8f 100%);
+    color: var(--color-light);
+    border: none;
+    border-radius: 10px;
+    font-size: var(--font-size-large);
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-normal);
+}
+
+.roll-dice-button:hover {
+    background: linear-gradient(135deg, #9a4fcf 0%, #7a3f9f 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.run-away-button {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: linear-gradient(135deg, #4a4a4a 0%, #2a2a2a 100%);
+    color: var(--color-light);
+    border: none;
+    border-radius: 10px;
+    font-size: var(--font-size-normal);
+    cursor: pointer;
+    transition: var(--transition-normal);
+    opacity: 0.8;
+}
+
+.run-away-button:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+}
+
+/* 주사위 애니메이션 */
+.dice-rolling {
+    animation: diceRoll 1s ease-in-out;
+}
+
+@keyframes diceRoll {
+    0% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(180deg) scale(1.2); }
+    50% { transform: rotate(360deg) scale(1); }
+    75% { transform: rotate(540deg) scale(1.2); }
+    100% { transform: rotate(720deg) scale(1); }
+}
+
+.dice-result-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 120px;
+    font-weight: bold;
+    z-index: 1001;
+    animation: diceResultShow 1.5s ease-out;
+    pointer-events: none;
+}
+
+@keyframes diceResultShow {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.5);
+    }
+    50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.5);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(2);
+    }
+}
+
+.dice-success {
+    color: var(--color-success);
+    text-shadow: 0 0 40px rgba(74, 143, 74, 0.8);
+}
+
+.dice-failure {
+    color: var(--color-danger);
+    text-shadow: 0 0 40px rgba(220, 38, 38, 0.8);
+}
+
+/* ==========================================================================
+   Game Sidebar - 게임 사이드바
+   ========================================================================== */
+
+.game-sidebar {
+    width: 350px;
+    min-width: 320px;
+    max-width: 400px;
+    height: 100vh;
+    background: 
+        linear-gradient(135deg, rgba(26, 15, 42, 0.95) 0%, rgba(42, 31, 58, 0.95) 100%);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid transparent;
+    border-image: linear-gradient(45deg, var(--color-primary), var(--color-secondary)) 1;
+    padding: var(--spacing-lg);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.ui-section {
+    background: rgba(138, 43, 226, 0.1);
+    border: 2px solid rgba(138, 43, 226, 0.3);
+    border-radius: 12px;
+    padding: var(--spacing-md);
+    transition: var(--transition-normal);
+}
+
+.ui-section:hover {
+    border-color: rgba(138, 43, 226, 0.5);
+    background: rgba(138, 43, 226, 0.15);
+    transform: translateY(-2px);
+}
+
+.ui-section-title {
+    font-size: var(--font-size-large);
+    font-weight: bold;
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+    text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+.action-button {
+    width: 100%;
+    padding: var(--spacing-md);
+    background: linear-gradient(135deg, var(--color-primary) 0%, #6a2f8f 100%);
+    color: var(--color-light);
+    border: none;
+    border-radius: 8px;
+    font-size: var(--font-size-normal);
+    font-weight: bold;
+    cursor: pointer;
+    transition: var(--transition-normal);
+    margin-bottom: var(--spacing-sm);
+    box-shadow: var(--shadow-normal);
+}
+
+.action-button:hover {
+    background: linear-gradient(135deg, #9a4fcf 0%, #7a3f9f 100%);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.action-button:active {
+    transform: translateY(0);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+    .game-sidebar {
+        width: 300px;
+        min-width: 280px;
+        padding: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    #game-container {
+        flex-direction: column;
+    }
+    
+    .game-board {
+        height: 60vh;
+    }
+    
+    .game-sidebar {
+        width: 100%;
+        height: 40vh;
+        border-left: none;
+        border-top: 4px solid transparent;
+        border-image: linear-gradient(90deg, var(--color-primary), var(--color-secondary)) 1;
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+    
+    .ui-section {
+        flex: 1;
+        min-width: 200px;
+        margin-bottom: 0;
+    }
+}

@@ -5,7 +5,12 @@
   "main": "index.html",
   "scripts": {
     "start": "python3 -m http.server 8000",
-    "dev": "python3 -m http.server 8000"
+    "dev": "python3 -m http.server 8000",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e && npm run test:performance",
+    "test:unit": "cd tests/unit && for file in *.js; do [ -f \"$file\" ] && node \"$file\"; done",
+    "test:integration": "cd tests/integration && for file in *.js; do [ -f \"$file\" ] && node \"$file\"; done",
+    "test:e2e": "cd tests/e2e && npx playwright test",
+    "test:performance": "cd tests/performance && for file in *.js; do [ -f \"$file\" ] && node \"$file\"; done"
   },
   "keywords": [
     "board game",
